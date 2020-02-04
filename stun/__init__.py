@@ -88,10 +88,12 @@ ChangedAddressError = "Meet an error, when do Test1 on Changed IP and Port"
 
 
 def _initialize():
-    items = dictAttrToVal.items()
+    items_dict = dictAttrToVal.items()
+    items = list(items_dict)
     for i in range(len(items)):
         dictValToAttr.update({items[i][1]: items[i][0]})
-    items = dictMsgTypeToVal.items()
+    items_dict = dictMsgTypeToVal.items()
+    items = list(items_dict)
     for i in range(len(items)):
         dictValToMsgType.update({items[i][1]: items[i][0]})
 
@@ -133,8 +135,8 @@ def stun_test(sock, host, port, source_ip, source_port, send_data=""):
                     retVal['Resp'] = False
                     return retVal
         msgtype = binascii.b2a_hex(buf[0:2])
-        bind_resp_msg = dictValToMsgType[msgtype] == "BindResponseMsg"
-        tranid_match = tranid.upper() == binascii.b2a_hex(buf[4:20]).upper()
+        bind_resp_msg = dictValToMsgType[msgtype.decode("utf-8")] == "BindResponseMsg"
+        tranid_match = tranid.upper() == binascii.b2a_hex(buf[4:20]).upper().decode("utf-8")
         if bind_resp_msg and tranid_match:
             recvCorr = True
             retVal['Resp'] = True
@@ -144,7 +146,7 @@ def stun_test(sock, host, port, source_ip, source_port, send_data=""):
             while len_remain:
                 attr_type = binascii.b2a_hex(buf[base:(base + 2)])
                 attr_len = int(binascii.b2a_hex(buf[(base + 2):(base + 4)]), 16)
-                if attr_type == MappedAddress:
+                if attr_type.decode("utf-8") == MappedAddress:
                     port = int(binascii.b2a_hex(buf[base + 6:base + 8]), 16)
                     ip = ".".join([
                         str(int(binascii.b2a_hex(buf[base + 8:base + 9]), 16)),
@@ -154,7 +156,7 @@ def stun_test(sock, host, port, source_ip, source_port, send_data=""):
                     ])
                     retVal['ExternalIP'] = ip
                     retVal['ExternalPort'] = port
-                if attr_type == SourceAddress:
+                if attr_type.decode("utf-8") == SourceAddress:
                     port = int(binascii.b2a_hex(buf[base + 6:base + 8]), 16)
                     ip = ".".join([
                         str(int(binascii.b2a_hex(buf[base + 8:base + 9]), 16)),
@@ -164,7 +166,7 @@ def stun_test(sock, host, port, source_ip, source_port, send_data=""):
                     ])
                     retVal['SourceIP'] = ip
                     retVal['SourcePort'] = port
-                if attr_type == ChangedAddress:
+                if attr_type.decode("utf-8") == ChangedAddress:
                     port = int(binascii.b2a_hex(buf[base + 6:base + 8]), 16)
                     ip = ".".join([
                         str(int(binascii.b2a_hex(buf[base + 8:base + 9]), 16)),
